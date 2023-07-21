@@ -53,7 +53,7 @@ router.post('/auth/register', async (request, env, _ctx) => {
 	return new Response('user exists');
 });
 
-router.get('/auth/login/cookie', async (request, env, ctx) => {
+router.get('/auth/login/cookie', async (request, env, _ctx) => {
 	const cookie = parse(request.headers.get('Cookie') || '');
 	const { username, password } = JSON.parse(cookie.session);
 	if (await checkUser(env, username, password)) {
