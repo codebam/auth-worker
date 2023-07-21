@@ -19,15 +19,22 @@ const userExists = async (env: Env, username: string) => {
 
 const router = Router();
 
+const withAuthenticatedUser = async (request: any, env: Env) => {
+	const cookie = parse(request.headers.get('Cookie') || '');
+	const { username, password } = JSON.parse(cookie.session);
+	if (!(await checkUser(env, username, password))) {
+		return new Response('invalid login');
+	}
+};
+
 const authForm = `<form method="POST" enctype="application/x-www-form-urlencoded">
 			<input type="text" name="username">
 			<input type="password" name="password">
 			<button type="submit">submit</button>
 		</form>`;
 
-router.get('/auth/info', async (request, _env, _ctx) => {
-	const cookie = parse(request.headers.get('Cookie') || '');
-	return new Response(JSON.stringify(cookie));
+router.all('*', withAuthenticatedUser).get('/auth/info', async (request, _env, _ctx) => {
+	return new Response('ok');
 });
 
 router.post('/auth/register', async (request, env, _ctx) => {
