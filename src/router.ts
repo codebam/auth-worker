@@ -11,6 +11,12 @@ const checkUser = async (env: Env, username: string, password: string) => {
 	return false;
 };
 
+const userExists = async (env: Env, username: string) => {
+	const { results } = await env.DB.prepare('SELECT username FROM Users WHERE username=?').bind(username).all();
+	if (results.length > 0) return true;
+	return false;
+};
+
 const router = Router();
 
 const authForm = `<form method="POST" enctype="application/x-www-form-urlencoded">
@@ -21,21 +27,32 @@ const authForm = `<form method="POST" enctype="application/x-www-form-urlencoded
 
 router.get('/auth/info', async (request, _env, _ctx) => {
 	const cookie = parse(request.headers.get('Cookie') || '');
-	console.log(cookie);
 	return new Response(JSON.stringify(cookie));
 });
 
 router.post('/auth/register', async (request, env, _ctx) => {
 	const form = await request.formData();
 	const username = form.get('username');
-	const hash = await crypto.subtle.digest('SHA-512', new TextEncoder().encode(form.get('password')));
-	let password = Array.from(new Uint8Array(hash))
-		.map((b) => b.toString(16).padStart(2, '0'))
-		.join('');
-	await newUser(env, username, password);
-	return new Response('ok', {
-		headers: { 'Set-Cookie': `session=${JSON.stringify({ username, password })}` },
-	});
+	if (!(await userExists(env, username))) {
+		const hash = await crypto.subtle.digest('SHA-512', new TextEncoder().encode(form.get('password')));
+		let password = Array.from(new Uint8Array(hash))
+			.map((b) => b.toString(16).padStart(2, '0'))
+			.join('');
+		await newUser(env, username, password);
+		return new Response('ok', {
+			headers: { 'Set-Cookie': `session=${JSON.stringify({ username, password })}` },
+		});
+	}
+	return new Response('user exists');
+});
+
+router.get('/auth/login/cookie', async (request, env, ctx) => {
+	const cookie = parse(request.headers.get('Cookie') || '');
+	const { username, password } = JSON.parse(cookie.session);
+	if (await checkUser(env, username, password)) {
+		return new Response('logged in');
+	}
+	return new Response('invalid login');
 });
 
 router.post('/auth/login', async (request, env, _ctx) => {
