@@ -55,7 +55,7 @@ router.get('/auth/login/cookie', async (request, env, _ctx) => {
 	const cookie = parse(request.headers.get('Cookie') || '');
 	const { username, password } = JSON.parse(cookie.session);
 	if (await checkUser(env, username, password)) {
-		return new Response('logged in');
+		return new Response(`${username} logged in`);
 	}
 	return new Response('invalid login');
 });
@@ -87,8 +87,10 @@ router.get('/auth/login', async (_request, _env, _ctx) => {
 	});
 });
 
-router.all('*', withAuthenticatedUser).get('/auth/info', async (_request, _env, _ctx) => {
-	return new Response('ok');
+router.all('*', withAuthenticatedUser).get('/auth/info', async (request, _env, _ctx) => {
+	const cookie = parse(request.headers.get('Cookie') || '');
+	const { username } = JSON.parse(cookie.session);
+	return new Response(`username: ${username}`);
 });
 
 // 404 for everything else
