@@ -16,6 +16,7 @@ compatibility_date = "2023-07-17"
 [[kv_namespaces]]
 binding = "auth"
 id = "0950dcf2ee46470da23723ab62725d5c"
+preview_id = "d820413165194d9980eb584b19f82f24"
 
 # Bind an R2 Bucket. Use R2 to store arbitrarily large blobs of data, such as files.
 # Docs: https://developers.cloudflare.com/r2/api/workers/workers-api-usage/
