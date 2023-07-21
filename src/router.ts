@@ -33,7 +33,7 @@ const authForm = `<form method="POST" enctype="application/x-www-form-urlencoded
 			<button type="submit">submit</button>
 		</form>`;
 
-router.all('*', withAuthenticatedUser).get('/auth/info', async (request, _env, _ctx) => {
+router.all('*', withAuthenticatedUser).get('/auth/info', async (_request, _env, _ctx) => {
 	return new Response('ok');
 });
 
