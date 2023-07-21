@@ -33,10 +33,6 @@ const authForm = `<form method="POST" enctype="application/x-www-form-urlencoded
 			<button type="submit">submit</button>
 		</form>`;
 
-router.all('*', withAuthenticatedUser).get('/auth/info', async (_request, _env, _ctx) => {
-	return new Response('ok');
-});
-
 router.post('/auth/register', async (request, env, _ctx) => {
 	const form = await request.formData();
 	const username = form.get('username');
@@ -47,7 +43,9 @@ router.post('/auth/register', async (request, env, _ctx) => {
 			.join('');
 		await newUser(env, username, password);
 		return new Response('ok', {
-			headers: { 'Set-Cookie': `session=${JSON.stringify({ username, password })}` },
+			headers: {
+				'Set-Cookie': `session=${JSON.stringify({ username, password })}`,
+			},
 		});
 	}
 	return new Response('user exists');
@@ -87,6 +85,10 @@ router.get('/auth/login', async (_request, _env, _ctx) => {
 	return new Response(authForm, {
 		headers: { 'Content-type': 'text/html' },
 	});
+});
+
+router.all('*', withAuthenticatedUser).get('/auth/info', async (_request, _env, _ctx) => {
+	return new Response('ok');
 });
 
 // 404 for everything else
