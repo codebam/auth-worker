@@ -87,13 +87,13 @@ router.get('/auth/login', async (_request, _env, _ctx) => {
 	});
 });
 
+// 404 for everything else
+router.all('*', () => new Response('Not Found.', { status: 404 }));
+
 router.all('*', withAuthenticatedUser).get('/auth/info', async (request, _env, _ctx) => {
 	const cookie = parse(request.headers.get('Cookie') || '');
 	const { username } = JSON.parse(cookie.session);
 	return new Response(`username: ${username}`);
 });
-
-// 404 for everything else
-router.all('*', () => new Response('Not Found.', { status: 404 }));
 
 export default router;
